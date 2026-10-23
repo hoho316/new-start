@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>长征路线图 · 1934—1936</title>
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============ 顶栏 ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="star"></div>
+      <div>
+        <h1>长征路线图</h1>
+        <p>LONG MARCH · 1934.10 — 1936.10</p>
+      </div>
+    </div>
+
+    <div class="hstats">
+      <div class="hstat"><b>二万五千里</b><span>中央红军行程</span></div>
+      <div class="hstat"><b>14</b><span>途经省份</span></div>
+      <div class="hstat"><b>20+</b><span>翻越雪山</span></div>
+      <div class="hstat"><b>近百</b><span>渡过江河</span></div>
+      <div class="hstat"><b>—</b><span>重要节点</span></div>
+    </div>
+
+    <div class="topright">
+      <button class="btn-mini on" id="btnWater" title="放大到较高层级自动浮现河流、湖泊、湿地标注">水系标注</button>
+      <button class="btn-mini on" id="btnGeo" title="雪山 / 草地 / 渡口 独立图层">自然地理层</button>
+      <div class="basegrp">
+        <button data-base="night" class="on">墨夜地形</button>
+        <button data-base="relief">地貌晕渲</button>
+        <button data-base="sat">卫星实景</button>
+        <button data-base="natgeo">军事制图</button>
+      </div>
+      <button class="btn-pano" id="btnPano">全景总览</button>
+    </div>
+  </header>
+
+  <!-- ============ 侧栏 ============ -->
+  <aside class="side" id="side">
+    <div class="side-head">
+      <h2>行军序列 / ORDER OF MARCH</h2>
+      <div class="phase">
+        <button data-phase="1">阶段一 · 中央红军</button>
+        <button data-phase="2" class="on">阶段二 · 三大主力</button>
+      </div>
+    </div>
+
+    <div class="armies">
+      <div class="army" data-a="c1"><span class="sw"></span><span class="nm">中央红军（红一方面军）</span><span class="ct"></span></div>
+      <div class="army" data-a="c2"><span class="sw"></span><span class="nm">红二方面军</span><span class="ct"></span></div>
+      <div class="army" data-a="c4"><span class="sw"></span><span class="nm">红四方面军</span><span class="ct"></span></div>
+    </div>
+
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="searchInput" type="text" placeholder="检索节点 · 地点 · 战役">
+    </div>
+
+    <div class="nodelist" id="nodelist"></div>
+
+    <div class="side-foot">
+      <span>共 <b id="totalCount">0</b> 个节点</span>
+      <span><b id="battleCount">0</b> 场战役战斗</span>
+    </div>
+  </aside>
+
+  <!-- ============ 地图区 ============ -->
+  <main class="maparea">
+    <div id="map"></div>
+    <div class="map-vignette"></div>
+    <div class="scan"></div>
+
+    <div class="legend">
+      <div class="lt">图 例</div>
+      <div class="lr sq" style="color:#ff3b30"><i></i>中央红军行军线</div>
+      <div class="lr sq" style="color:#22d3ee"><i></i>红二方面军行军线</div>
+      <div class="lr sq" style="color:#b06bff"><i></i>红四方面军行军线</div>
+
+      <div class="lg-sep"></div>
+      <div class="lt lt2">自然地理层 <b id="geoTotal">0</b></div>
+      <div class="lr" style="color:#8ecbff"><i class="sh-hex" style="--c:#8ecbff"></i>翻越雪山 <b id="snowCount">0</b></div>
+      <div class="lr" style="color:#43d98b"><i class="sh-leaf" style="--c:#43d98b"></i>穿越草地 <b id="grassCount">0</b></div>
+      <div class="lr" style="color:#2fb4ff"><i class="sh-drop" style="--c:#2fb4ff"></i>江河渡口 <b id="riverCount">0</b></div>
+
+      <div class="lg-sep"></div>
+      <div class="lr" style="color:#3ec6ff"><i class="sh-line" style="--c:#3ec6ff"></i>河流水系 <b id="waterCount">0</b></div>
+      <div class="lr" style="color:#43d98b"><i class="sh-wet" style="--c:#43d98b"></i>湖泊 · 沼泽湿地</div>
+      <div class="lg-note">放大至 z ≥ 8 自动浮现水系标注</div>
+    </div>
+
+    <div class="terrain-chip" id="terrainChip">
+      <div class="tc-ico" id="tcIco">雪</div>
+      <div class="tc-tx">
+        <b id="tcTitle">地形视图</b>
+        <s id="tcSub"></s>
+        <s id="tcGeo" class="tc-geo"></s>
+        <s id="tcWater" class="tc-water"></s>
+      </div>
+      <button class="tc-x" id="tcClose">返回路线全景</button>
+    </div>
+
+    <div class="hint" id="hint">点击任一 <b>节点标记</b> 查看信息卡片，卡片内可 <b>放大看地理形态</b>（自动叠加水系与山体晕渲）</div>
+
+    <!-- 信息卡片 -->
+    <section class="card" id="card"></section>
+
+    <!-- 时间轴 -->
+    <div class="timeline" id="timeline">
+      <div class="tl-top">
+        <button class="tl-play" id="tlPlay">▶</button>
+        <span class="tl-date" id="tlDate">1934.10.10</span>
+        <span class="tl-cur" id="tlCur"></span>
+      </div>
+      <input type="range" class="tl-range" id="tlRange" min="0" max="0" value="0" step="1">
+      <div class="tl-ticks"><span>1934.10 出发</span><span>1935.01 遵义</span><span>1935.10 吴起</span><span>1936.10 会师</span></div>
+    </div>
+  </main>
+
+  <!-- 加载层 -->
+  <div class="loading" id="loading">
+    <div class="load-in">
+      <div class="load-ring"></div>
+      <span>正在装载行军路线</span>
+    </div>
+  </div>
+</div>
+
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/geo.js"></script>
+<script src="assets/js/routes-geo.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

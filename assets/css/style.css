@@ -1,0 +1,612 @@
+/* =========================================================
+   长征路线图 · 指挥台样式
+   ========================================================= */
+:root{
+  --bg:#070a12;
+  --bg2:#0b1020;
+  --panel:rgba(13,19,33,.86);
+  --panel-solid:#0d1321;
+  --line:rgba(120,160,220,.16);
+  --line-strong:rgba(120,170,255,.34);
+  --txt:#e8eef9;
+  --txt2:#9fb0c9;
+  --txt3:#6b7d97;
+  --red:#ff3b30;
+  --cyan:#22d3ee;
+  --purple:#b06bff;
+  --gold:#f5c451;
+  --snow:#8fd6ff;
+  --grass:#5fd39b;
+  --r:14px;
+  --shadow:0 18px 50px rgba(0,0,0,.55);
+  --ui:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,sans-serif;
+  --serif:"Songti SC","Source Han Serif SC","Noto Serif CJK SC","STZhongsong","SimSun",serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--ui);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:rgba(120,170,255,.24);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- 布局 ---------- */
+#app{
+  height:100vh;display:grid;
+  grid-template-columns:352px 1fr;
+  grid-template-rows:72px 1fr;
+  grid-template-areas:"top top" "side map";
+  position:relative;
+}
+
+/* ---------- 顶栏 ---------- */
+.topbar{
+  grid-area:top;display:flex;align-items:center;gap:22px;
+  padding:0 24px;background:linear-gradient(180deg,#0b1120 0%,rgba(9,14,25,.94) 100%);
+  border-bottom:1px solid var(--line);position:relative;z-index:900;
+}
+.topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,59,48,.55),rgba(34,211,238,.5),transparent);
+}
+.brand{display:flex;align-items:center;gap:13px;flex:0 0 auto}
+.star{
+  width:34px;height:34px;flex:0 0 auto;position:relative;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 45%,#ff5a4a,#c11d18 62%,#7c0f10);
+  clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  filter:drop-shadow(0 0 10px rgba(255,59,48,.65));
+  animation:breathe 3.6s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{filter:drop-shadow(0 0 6px rgba(255,59,48,.5))}50%{filter:drop-shadow(0 0 16px rgba(255,80,60,.95))}}
+.brand h1{
+  font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:3px;line-height:1.1;
+  background:linear-gradient(96deg,#fff 6%,#ffd9d3 38%,#ff6b5b 62%,#ffb9a8 92%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.brand p{font-size:11px;color:var(--txt3);letter-spacing:1.4px;margin-top:3px}
+
+.hstats{display:flex;gap:8px;margin-left:6px;flex:1 1 auto;overflow:hidden}
+.hstat{
+  display:flex;flex-direction:column;gap:1px;padding:6px 14px;min-width:74px;
+  border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.018);
+  position:relative;overflow:hidden;
+}
+.hstat b{font-size:15px;font-weight:700;letter-spacing:.5px;color:#fff;font-variant-numeric:tabular-nums}
+.hstat span{font-size:10px;color:var(--txt3);letter-spacing:.8px}
+.hstat::before{
+  content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 20%,rgba(120,190,255,.14) 50%,transparent 80%);
+  transform:translateX(-120%);animation:sweep 6s ease-in-out infinite;
+}
+@keyframes sweep{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+
+.topright{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.basegrp{display:flex;padding:3px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:11px;gap:2px}
+.basegrp button{
+  padding:7px 13px;font-size:12px;color:var(--txt2);border-radius:8px;letter-spacing:.6px;
+  transition:.22s;
+}
+.basegrp button:hover{color:#fff;background:rgba(255,255,255,.06)}
+.basegrp button.on{
+  color:#04121c;font-weight:700;
+  background:linear-gradient(180deg,#7fe9ff,#22d3ee);
+  box-shadow:0 0 16px rgba(34,211,238,.45);
+}
+.btn-pano{
+  padding:8px 15px;font-size:12px;letter-spacing:.8px;color:var(--txt);
+  border:1px solid var(--line-strong);border-radius:10px;background:rgba(34,211,238,.07);
+  transition:.22s;white-space:nowrap;
+}
+.btn-pano:hover{background:rgba(34,211,238,.18);box-shadow:0 0 18px rgba(34,211,238,.3)}
+
+/* ---------- 侧栏 ---------- */
+.side{
+  grid-area:side;background:var(--panel-solid);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;position:relative;z-index:800;
+}
+.side-head{padding:15px 18px 11px;border-bottom:1px solid var(--line)}
+.side-head h2{font-size:12px;letter-spacing:2.4px;color:var(--txt3);font-weight:600;text-transform:uppercase}
+.phase{
+  display:flex;gap:6px;margin-top:11px;padding:3px;background:rgba(255,255,255,.035);
+  border:1px solid var(--line);border-radius:10px;
+}
+.phase button{
+  flex:1;padding:7px 0;font-size:12px;color:var(--txt2);border-radius:7px;transition:.2s;letter-spacing:.5px;
+}
+.phase button.on{background:linear-gradient(180deg,rgba(255,59,48,.22),rgba(255,59,48,.1));color:#fff;border:1px solid rgba(255,90,70,.4);font-weight:600}
+.armies{padding:13px 18px 4px;display:flex;flex-direction:column;gap:7px}
+.army{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;cursor:pointer;
+  border:1px solid transparent;background:rgba(255,255,255,.022);transition:.2s;
+}
+.army:hover{background:rgba(255,255,255,.05)}
+.army .sw{width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:var(--c);box-shadow:0 0 9px var(--c)}
+.army .nm{font-size:12.5px;flex:1;letter-spacing:.3px;transition:.2s}
+.army .ct{font-size:10.5px;color:var(--txt3);font-variant-numeric:tabular-nums}
+.army.off{opacity:.38}
+.army.off .nm{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.35)}
+.army[data-a="c1"]{--c:var(--red)}
+.army[data-a="c2"]{--c:var(--cyan)}
+.army[data-a="c4"]{--c:var(--purple)}
+
+.searchbox{margin:10px 18px 4px;position:relative}
+.searchbox input{
+  width:100%;padding:9px 12px 9px 32px;font-size:12.5px;color:var(--txt);
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;outline:none;font-family:inherit;
+  transition:.2s;letter-spacing:.4px;
+}
+.searchbox input:focus{border-color:rgba(34,211,238,.55);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.searchbox input::placeholder{color:var(--txt3)}
+.searchbox svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;opacity:.45}
+
+.nodelist{flex:1;overflow-y:auto;padding:8px 12px 16px;min-height:0}
+.nl-group{margin-bottom:6px}
+.nl-gt{
+  display:flex;align-items:center;gap:8px;padding:10px 6px 6px;font-size:10.5px;letter-spacing:1.6px;color:var(--txt3);
+}
+.nl-gt i{width:16px;height:1px;background:currentColor;opacity:.45;display:block}
+.nl-gt em{font-style:normal;color:var(--c,#fff);opacity:.9}
+.ni{
+  display:flex;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer;position:relative;
+  transition:.16s;border:1px solid transparent;
+}
+.ni:hover{background:rgba(255,255,255,.05)}
+.ni.on{background:rgba(255,59,48,.12);border-color:rgba(255,90,70,.4)}
+.ni.dim{opacity:.3}
+.ni .dot{
+  width:7px;height:7px;border-radius:50%;margin-top:6px;flex:0 0 auto;
+  background:var(--c);box-shadow:0 0 8px var(--c);
+}
+.ni .tx{flex:1;min-width:0}
+.ni .tx b{display:block;font-size:12.5px;font-weight:500;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ni .tx s{
+  display:block;font-size:10.5px;color:var(--txt3);text-decoration:none;margin-top:3px;
+  font-variant-numeric:tabular-nums;letter-spacing:.4px;
+}
+.ni .tp{font-size:10px;color:var(--txt3);align-self:center;padding:2px 6px;border:1px solid var(--line);border-radius:5px}
+.side-foot{
+  padding:11px 18px;border-top:1px solid var(--line);font-size:10.5px;color:var(--txt3);
+  display:flex;justify-content:space-between;letter-spacing:.4px;
+}
+.side-foot b{color:var(--txt2);font-weight:600}
+
+/* ---------- 地图 ---------- */
+.maparea{grid-area:map;position:relative;min-width:0;overflow:hidden;background:#05080f}
+#map{position:absolute;inset:0;background:#05080f;z-index:1}
+.map-vignette{
+  position:absolute;inset:0;z-index:400;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,transparent 42%,rgba(4,7,14,.55) 100%);
+}
+.scan{
+  position:absolute;inset:0;z-index:401;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(180deg,rgba(120,190,255,.045) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay;
+}
+.scan::after{
+  content:"";position:absolute;left:0;right:0;height:120px;
+  background:linear-gradient(180deg,transparent,rgba(34,211,238,.09),transparent);
+  animation:scanmove 9s linear infinite;
+}
+@keyframes scanmove{0%{top:-140px}100%{top:100%}}
+
+/* 底图暗色化 */
+.leaflet-tile-pane.darken .leaflet-tile{
+  filter:invert(1) hue-rotate(178deg) saturate(.55) brightness(.82) contrast(1.05);
+}
+.leaflet-tile-pane.topo-light .leaflet-tile{filter:saturate(.9) contrast(1.02)}
+.leaflet-tile-pane.satboost .leaflet-tile{filter:brightness(1.22) contrast(1.08) saturate(1.1)}
+.leaflet-control-attribution{
+  background:rgba(8,12,20,.72)!important;color:#7b8ea8!important;font-size:10px!important;
+  border-radius:6px 0 0 0;
+}
+.leaflet-control-attribution a{color:#8fa6c2!important}
+.leaflet-control-zoom{display:none}
+
+/* ---------- 标记 ---------- */
+.mk{position:relative;width:0;height:0;--c:#ff3b30}
+.mk-core{
+  position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,rgba(255,255,255,.95),var(--c) 52%,rgba(0,0,0,.55) 100%);
+  border:1.5px solid rgba(255,255,255,.85);
+  box-shadow:0 0 12px var(--c),0 2px 6px rgba(0,0,0,.6);
+  display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.75);transition:transform .22s,box-shadow .22s;
+}
+.mk-halo{
+  position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;
+  border:1px solid var(--c);opacity:.85;animation:pulse 2.4s ease-out infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1);opacity:.8}
+  70%{transform:scale(2.6);opacity:0}
+  100%{transform:scale(2.6);opacity:0}
+}
+.mk.star .mk-core{width:26px;height:26px;left:-13px;top:-13px;font-size:11px;border-width:2px;
+  box-shadow:0 0 20px var(--c),0 0 40px rgba(255,59,48,.35),0 2px 8px rgba(0,0,0,.7)}
+.mk.star .mk-halo{width:26px;height:26px;left:-13px;top:-13px;animation-duration:1.9s}
+.mk-label{
+  position:absolute;left:15px;top:-9px;white-space:nowrap;font-size:11px;letter-spacing:.6px;
+  color:#eaf2ff;background:rgba(8,13,23,.82);border:1px solid rgba(140,180,240,.24);
+  padding:2.5px 7px;border-radius:5px;opacity:0;transform:translateX(-5px);transition:.2s;
+  pointer-events:none;backdrop-filter:blur(4px);
+}
+.mk-label b{color:var(--c);font-weight:600;margin-right:4px}
+.mk.show-label .mk-label{opacity:1;transform:translateX(0)}
+.mk.alt .mk-label{left:auto;right:15px;transform:translateX(5px)}
+.mk.alt.show-label .mk-label,.mk.alt:hover .mk-label{transform:translateX(0)}
+.mk:hover .mk-core{transform:scale(1.28);box-shadow:0 0 22px var(--c),0 0 46px var(--c)}
+.mk:hover .mk-label{opacity:1;transform:translateX(0)}
+.mk.active .mk-core{transform:scale(1.34);box-shadow:0 0 0 3px rgba(255,255,255,.22),0 0 26px var(--c)}
+.mk.active .mk-halo{border-width:2px;animation-duration:1.2s}
+.mk.faded{opacity:.22;filter:grayscale(.7)}
+.mk.faded .mk-halo{animation:none;opacity:0}
+.mk.minor-hidden{opacity:0;pointer-events:none;transform:scale(.35);transition:opacity .3s,transform .3s}
+
+/* ---------- 行军线流动 ---------- */
+@keyframes flowline{to{stroke-dashoffset:-48}}
+.route-flow{
+  stroke-dasharray:14 10;
+  animation:flowline 1.7s linear infinite;
+}
+
+/* 行军前锋游标 */
+.ph{position:relative;width:0;height:0}
+.ph-dot{
+  position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#ff3b30 65%);
+  box-shadow:0 0 14px #ff3b30,0 0 30px rgba(255,59,48,.7);
+}
+.ph-ring{
+  position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;
+  border:1.5px solid rgba(255,120,100,.9);animation:pulse 1.6s ease-out infinite;
+}
+
+/* 雪山 / 草地节点环 */
+.mk.t-snow .mk-core{box-shadow:0 0 0 2px #9fe0ff,0 0 14px var(--c),0 2px 6px rgba(0,0,0,.6)}
+.mk.t-grass .mk-core{box-shadow:0 0 0 2px #5fd39b,0 0 14px var(--c),0 2px 6px rgba(0,0,0,.6)}
+.mk.t-meet .mk-core{box-shadow:0 0 0 2px #f5c451,0 0 14px var(--c),0 2px 6px rgba(0,0,0,.6)}
+.mk-wrap,.ph-wrap{background:none;border:0}
+.mk{animation:dropIn .55s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes dropIn{from{opacity:0;transform:translateY(-14px) scale(.6)}to{opacity:1;transform:none}}
+
+/* ---------- 图例 ---------- */
+.legend{
+  position:absolute;left:16px;bottom:96px;z-index:500;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;backdrop-filter:blur(12px);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:7px;min-width:132px;
+}
+.legend .lt{font-size:10px;letter-spacing:1.8px;color:var(--txt3);margin-bottom:2px}
+.legend .lr{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--txt2)}
+.legend .lr i{width:8px;height:8px;border-radius:50%;display:block}
+.legend .lr.sq i{border-radius:2px;width:12px;height:3px;box-shadow:0 0 8px currentColor}
+
+/* 地形视图浮条 */
+.terrain-chip{
+  position:absolute;left:50%;top:16px;transform:translate(-50%,-24px);z-index:600;
+  display:flex;align-items:center;gap:14px;padding:10px 12px 10px 16px;border-radius:12px;
+  background:linear-gradient(120deg,rgba(10,42,58,.94),rgba(12,20,34,.94));
+  border:1px solid rgba(34,211,238,.42);box-shadow:0 0 34px rgba(34,211,238,.22),var(--shadow);
+  backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.2,.8,.3,1);
+  max-width:min(680px,86%);
+}
+.terrain-chip.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.tc-ico{
+  width:34px;height:34px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+  background:radial-gradient(circle at 40% 30%,#6ee7f9,#0891b2);color:#031018;font-weight:800;flex:0 0 auto;
+}
+.tc-tx{flex:1;min-width:0}
+.tc-tx b{display:block;font-size:13px;letter-spacing:.6px}
+.tc-tx s{display:block;text-decoration:none;font-size:11px;color:#8fb6c9;margin-top:3px;letter-spacing:.3px}
+.tc-x{
+  padding:6px 11px;font-size:11px;border:1px solid rgba(34,211,238,.45);border-radius:7px;
+  color:#a5f3fc;white-space:nowrap;transition:.2s;
+}
+.tc-x:hover{background:rgba(34,211,238,.18);color:#fff}
+
+/* ---------- 信息卡片 ---------- */
+.card{
+  position:absolute;right:0;top:0;bottom:0;width:426px;z-index:700;
+  background:linear-gradient(200deg,rgba(14,21,36,.97),rgba(9,13,23,.99));
+  border-left:1px solid var(--line-strong);box-shadow:-24px 0 60px rgba(0,0,0,.6);
+  transform:translateX(102%);transition:transform .42s cubic-bezier(.16,.9,.3,1);
+  display:flex;flex-direction:column;backdrop-filter:blur(18px);
+}
+.card.on{transform:translateX(0)}
+.card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,transparent,var(--ac,#ff3b30),transparent);
+  opacity:.85;
+}
+.card-head{padding:18px 20px 14px;position:relative;border-bottom:1px solid var(--line)}
+.card-head .ribbon{
+  display:inline-flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:1.4px;
+  padding:3.5px 9px;border-radius:5px;margin-bottom:10px;
+  background:color-mix(in srgb,var(--ac) 16%,transparent);
+  border:1px solid color-mix(in srgb,var(--ac) 42%,transparent);
+  color:var(--ac);
+}
+.card-head h3{
+  font-family:var(--serif);font-size:25px;line-height:1.25;letter-spacing:1.5px;font-weight:700;
+  color:#fff;
+}
+.card-head .when{
+  margin-top:8px;font-size:12px;color:var(--gold);letter-spacing:1px;font-variant-numeric:tabular-nums;
+  display:flex;align-items:center;gap:8px;
+}
+.card-head .when::before{content:"";width:16px;height:1px;background:var(--gold);opacity:.6}
+.card-close{
+  position:absolute;right:14px;top:14px;width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;color:var(--txt3);border:1px solid var(--line);transition:.2s;font-size:15px;
+}
+.card-close:hover{color:#fff;border-color:var(--line-strong);background:rgba(255,255,255,.06)}
+
+.card-body{flex:1;overflow-y:auto;padding:16px 20px 8px;min-height:0}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.meta{
+  padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+}
+.meta span{display:block;font-size:10px;letter-spacing:1.1px;color:var(--txt3);margin-bottom:3px}
+.meta b{font-size:12px;font-weight:500;color:#dbe6f7;letter-spacing:.3px}
+.meta.wide{grid-column:span 2}
+.meta.code b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#8fe3ff;letter-spacing:0}
+
+.sec{margin-bottom:15px}
+.sec h4{
+  font-size:11px;letter-spacing:2px;color:var(--txt3);font-weight:600;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec h4::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.sec p{font-size:12.8px;line-height:1.92;color:#c6d3e6;letter-spacing:.3px;text-align:justify}
+.sec p em{font-style:normal;color:#fff;font-weight:600}
+.sec.signif p{color:#e6d5a8}
+.sec.signif p::before{
+  content:"※";color:var(--gold);margin-right:5px;opacity:.8;
+}
+
+.battle{
+  border-radius:11px;overflow:hidden;border:1px solid rgba(255,90,70,.24);
+  background:linear-gradient(170deg,rgba(255,59,48,.075),rgba(255,59,48,.02));
+}
+.battle-hd{
+  display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:11px;letter-spacing:1.6px;
+  color:#ff9d92;background:rgba(255,59,48,.1);border-bottom:1px solid rgba(255,90,70,.22);
+}
+.battle-hd i{width:5px;height:5px;border-radius:50%;background:#ff5a4a;box-shadow:0 0 8px #ff5a4a}
+.brow{display:flex;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.045);font-size:12px;line-height:1.72}
+.brow:last-child{border-bottom:0}
+.brow span{
+  flex:0 0 52px;color:#8b9cb5;font-size:10.5px;letter-spacing:1px;padding-top:2px;
+}
+.brow p{flex:1;color:#d3ddec;margin:0;text-align:justify}
+.brow.res p{color:#a9f0c4}
+
+.card-foot{
+  padding:12px 20px 16px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;background:rgba(6,10,18,.5);
+}
+.nav-b{
+  width:36px;height:36px;flex:0 0 auto;border-radius:9px;border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--txt2);transition:.2s;
+}
+.nav-b:hover{color:#fff;border-color:var(--line-strong);background:rgba(255,255,255,.06)}
+.nav-b:disabled{opacity:.28;cursor:not-allowed}
+.btn-terrain{
+  flex:1;height:36px;border-radius:9px;font-size:12.5px;letter-spacing:1.2px;font-weight:600;
+  background:linear-gradient(120deg,#0891b2,#22d3ee);color:#031018;transition:.24s;
+  display:flex;align-items:center;justify-content:center;gap:7px;position:relative;overflow:hidden;
+}
+.btn-terrain:hover{box-shadow:0 0 24px rgba(34,211,238,.55);transform:translateY(-1px)}
+.btn-terrain::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);
+  transform:translateX(-130%);
+}
+.btn-terrain:hover::after{animation:shine .8s ease}
+@keyframes shine{to{transform:translateX(130%)}}
+.btn-terrain.active{background:linear-gradient(120deg,#f5c451,#ff9d2e);color:#20160a}
+
+/* ---------- 时间轴 ---------- */
+.timeline{
+  position:absolute;left:16px;right:442px;bottom:16px;z-index:500;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:10px 16px 11px;backdrop-filter:blur(14px);box-shadow:var(--shadow);
+  transition:right .42s cubic-bezier(.16,.9,.3,1);
+}
+.card.on ~ .timeline{right:452px}
+.tl-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.tl-play{
+  width:26px;height:26px;border-radius:50%;background:rgba(255,59,48,.16);
+  border:1px solid rgba(255,90,70,.45);display:grid;place-items:center;color:#ff8b7f;font-size:10px;
+  transition:.2s;flex:0 0 auto;
+}
+.tl-play:hover{background:rgba(255,59,48,.3);color:#fff}
+.tl-date{font-size:12.5px;color:#fff;letter-spacing:1.2px;font-variant-numeric:tabular-nums;min-width:96px}
+.tl-cur{font-size:11.5px;color:var(--txt2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-cur b{color:#ffb0a6;font-weight:600}
+.tl-range{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.1);outline:none;cursor:pointer}
+.tl-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#ff3b30 60%);
+  box-shadow:0 0 12px rgba(255,59,48,.8);cursor:grab;border:1.5px solid #fff;
+}
+.tl-ticks{display:flex;justify-content:space-between;font-size:9.5px;color:var(--txt3);margin-top:5px;letter-spacing:.5px}
+
+/* ---------- 提示与加载 ---------- */
+.hint{
+  position:absolute;left:50%;bottom:118px;transform:translateX(-50%);z-index:500;
+  font-size:11.5px;color:var(--txt2);background:rgba(8,13,23,.8);
+  border:1px solid var(--line);border-radius:20px;padding:7px 16px;letter-spacing:.6px;
+  backdrop-filter:blur(8px);transition:.3s;white-space:nowrap;
+}
+.hint b{color:#ffb0a6}
+.hint.hide{opacity:0;transform:translate(-50%,10px);pointer-events:none}
+
+.loading{
+  position:absolute;inset:0;z-index:1000;background:#070a12;display:grid;place-items:center;
+  transition:opacity .5s;
+}
+.loading.out{opacity:0;pointer-events:none}
+.load-in{display:flex;flex-direction:column;align-items:center;gap:16px}
+.load-ring{
+  width:44px;height:44px;border-radius:50%;border:2px solid rgba(120,170,255,.16);
+  border-top-color:#ff3b30;animation:spin .9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-in span{font-size:12px;letter-spacing:3px;color:var(--txt3)}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1180px){
+  #app{grid-template-columns:290px 1fr}
+  .card{width:380px}
+  .timeline{right:16px}
+  .card.on ~ .timeline{right:396px}
+  .hstats .hstat:nth-child(n+4){display:none}
+}
+@media (max-width:900px){
+  #app{grid-template-columns:1fr;grid-template-rows:64px 1fr;grid-template-areas:"top" "map"}
+  .side{position:absolute;left:0;top:64px;bottom:0;width:290px;z-index:850;transform:translateX(-100%);transition:transform .3s}
+  .side.open{transform:translateX(0)}
+  .card{width:100%;border-left:0}
+  .brand h1{font-size:19px}
+  .hstats{display:none}
+  .timeline{left:12px;right:12px;bottom:12px}
+  .card.on ~ .timeline{right:12px;opacity:0;pointer-events:none}
+  .legend{display:none}
+}
+
+/* =========================================================
+   v2 增强：自然地理层 / 水系标注 / 地貌纹理
+   ========================================================= */
+
+/* ---------- 顶栏小开关 ---------- */
+.btn-mini{
+  padding:7px 11px;font-size:11.5px;letter-spacing:.6px;color:var(--txt3);
+  border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.02);
+  transition:.2s;white-space:nowrap;
+}
+.btn-mini::before{content:"○ ";font-size:9px;opacity:.7}
+.btn-mini.on::before{content:"◉ ";opacity:.95}
+.btn-mini:hover{color:#fff;background:rgba(255,255,255,.07);border-color:var(--line-strong)}
+.btn-mini.on{
+  color:#7fe9ff;border-color:rgba(34,211,238,.42);background:rgba(34,211,238,.1);
+  box-shadow:0 0 14px rgba(34,211,238,.18);
+}
+
+/* ---------- 图例扩展 ---------- */
+.legend .lg-sep{height:1px;background:linear-gradient(90deg,var(--line),transparent);margin:2px 0}
+.legend .lt.lt2{display:flex;align-items:center;gap:6px;margin:1px 0 -1px}
+.legend .lt.lt2 b{color:var(--txt2);font-weight:700;font-variant-numeric:tabular-nums}
+.legend .lr b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+.legend .lr i.sh-hex{
+  width:10px;height:10px;border-radius:0;background:var(--c);box-shadow:none;
+  clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+}
+.legend .lr i.sh-leaf{
+  width:10px;height:10px;border-radius:50% 8% 50% 8%;background:var(--c);
+  box-shadow:0 0 8px var(--c);
+}
+.legend .lr i.sh-drop{
+  width:10px;height:10px;border-radius:0;background:var(--c);box-shadow:0 0 8px var(--c);
+  clip-path:polygon(50% 0,82% 32%,92% 55%,88% 76%,68% 94%,50% 100%,32% 94%,12% 76%,8% 55%,18% 32%);
+}
+.legend .lr i.sh-line{width:13px;height:2px;border-radius:1px;background:var(--c);box-shadow:0 0 7px var(--c)}
+.legend .lr i.sh-wet{
+  width:11px;height:11px;border-radius:50%;border:1px dashed var(--c);
+  background:transparent;box-shadow:none;
+}
+.legend .lg-note{
+  font-size:9.5px;color:var(--txt3);letter-spacing:.2px;line-height:1.55;
+  margin-top:2px;opacity:.8;max-width:150px;
+}
+
+/* ---------- 自然地理节点：六边冰晶 / 叶片 / 水滴 ---------- */
+.mk.geo .mk-core{
+  border:0;
+  background:radial-gradient(circle at 36% 28%,#fff 0%,var(--gc) 48%,color-mix(in srgb,var(--gc) 45%,#00101c) 100%);
+  filter:drop-shadow(0 0 9px color-mix(in srgb,var(--gc) 80%,transparent));
+  box-shadow:none;
+}
+.mk.g-snow .mk-core{clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
+.mk.g-grass .mk-core{border-radius:50% 10% 50% 10%}
+.mk.g-river .mk-core{
+  border-radius:0;
+  clip-path:polygon(50% 0,82% 32%,92% 55%,88% 76%,68% 94%,50% 100%,32% 94%,12% 76%,8% 55%,18% 32%);
+}
+.mk.geo .mk-core{font-size:9.5px}
+.mk.geo .mk-halo{border-color:var(--gc);opacity:.7}
+.mk.geo .mk-label b{color:var(--gc)}
+.mk.geo:hover .mk-core{filter:drop-shadow(0 0 16px var(--gc)) drop-shadow(0 0 26px color-mix(in srgb,var(--gc) 60%,transparent))}
+.mk.geo.active .mk-core{
+  filter:drop-shadow(0 0 18px var(--gc));
+  transform:scale(1.32);
+}
+.mk.star.geo .mk-core{filter:drop-shadow(0 0 14px var(--gc)) drop-shadow(0 0 26px color-mix(in srgb,var(--gc) 55%,transparent))}
+
+/* 关闭自然地理层时，列表同步降权 */
+body.geo-off .ni.is-geo{opacity:.34}
+body.geo-off .ni.is-geo .dot{box-shadow:none}
+
+/* ---------- 水系标注 ---------- */
+.hlb-wrap{background:none;border:0}
+.hlb{
+  position:absolute;left:0;top:0;display:block;white-space:nowrap;
+  font-family:var(--serif);font-style:italic;font-size:11.5px;letter-spacing:2.6px;
+  color:#9fe6ff;pointer-events:none;
+  text-shadow:0 0 7px rgba(0,16,32,.95),0 0 3px #021018,0 1px 2px rgba(0,0,0,.9);
+}
+.hlb.lv1{font-size:13px;letter-spacing:3.4px;color:#a8ecff}
+.hlb.lv2{font-size:11.5px;color:#8fdcff;opacity:.95}
+.hlb.lv3{font-size:10px;letter-spacing:1.6px;color:#79c2e6;opacity:.82}
+.hlb.lake{font-style:normal;font-size:11px;letter-spacing:1.2px;color:#8fd0ff}
+.hlb.wet{font-style:normal;font-size:11px;letter-spacing:1.4px;color:#84e8b6}
+.hydro-line{filter:drop-shadow(0 0 3px rgba(30,150,230,.45))}
+.hydro-wet{animation:wetpulse 4.6s ease-in-out infinite}
+@keyframes wetpulse{0%,100%{fill-opacity:.12;stroke-opacity:.5}50%{fill-opacity:.2;stroke-opacity:.7}}
+
+/* 关掉水系后，注记整体淡出 */
+body.hydro-off .hlb-wrap{opacity:0}
+
+/* ---------- 山体晕渲与湿地纹理 ---------- */
+.leaflet-relief-pane .leaflet-tile{filter:grayscale(1) contrast(1.18) brightness(.98)}
+.leaflet-relief-pane.relief-snow{mix-blend-mode:multiply;opacity:.44}
+.leaflet-relief-pane.relief-grass{mix-blend-mode:multiply;opacity:.26}
+.leaflet-relief-pane.relief-river{mix-blend-mode:multiply;opacity:.3}
+.leaflet-tile-pane.snowboost .leaflet-tile{filter:contrast(1.14) saturate(.9) brightness(1.08)}
+.leaflet-tile-pane.wetboost .leaflet-tile{filter:saturate(1.52) contrast(1.07) brightness(1.06)}
+
+/* ---------- 地形浮条：地貌纹理行 ---------- */
+.tc-tx s.tc-geo{
+  display:none;margin-top:5px;font-size:10.5px;line-height:1.5;letter-spacing:.2px;
+  color:#7fdcae;
+}
+.tc-tx s.tc-geo.on{display:block}
+.tc-tx s.tc-water{
+  display:none;margin-top:4px;font-size:10.5px;line-height:1.5;letter-spacing:.2px;color:#8fd0ff;
+}
+.tc-tx s.tc-water.on{display:block}
+
+/* ---------- 卡片：地貌纹理块 ---------- */
+.geocard{
+  border:1px solid color-mix(in srgb,var(--gc) 34%,transparent);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--gc) 11%,transparent),transparent);
+  border-radius:10px;padding:10px 12px;
+}
+.geocard b{display:block;font-size:12.5px;color:var(--gc);letter-spacing:.8px;margin-bottom:5px;font-weight:600}
+.geocard p{font-size:12px;line-height:1.8;color:#bccbdd;margin:0;text-align:justify}
+.sec.geo-sec h4{color:color-mix(in srgb,var(--gc) 70%,#8fa6c2)}
+.card-head .ribbon.geo{border-color:color-mix(in srgb,var(--ac) 48%,transparent)}
+
+@media (max-height:860px){
+  .legend .lg-note{display:none}
+  .legend{gap:5px;padding:9px 11px}
+}
+@media (max-width:1180px){
+  .btn-mini{padding:6px 9px;font-size:11px}
+}
+@media (max-width:900px){
+  .btn-mini{display:none}
+}
