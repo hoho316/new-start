@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070a12">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="中国工农红军长征路线地图 · 移动端：全局路线 → 节点详情 → 放大看地形">
+<title>长征路线图 · 移动端</title>
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/mobile.css">
+</head>
+<body data-pane="list">
+
+<!-- ============ 地图 ============ -->
+<div id="map" class="map"></div>
+<div class="map-shade"></div>
+<div class="map-vignette"></div>
+
+<!-- ============ 顶栏 ============ -->
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <span class="bstar" aria-hidden="true"></span>
+    <span class="bt">
+      <b>长征路线图</b>
+      <s>1934.10 — 1936.10 · 三大主力</s>
+    </span>
+  </div>
+  <div class="tbtns">
+    <button class="tbtn" id="btnPano" type="button">全景</button>
+  </div>
+</header>
+
+<!-- ============ 地形浮条 ============ -->
+<div class="chip" id="chip" role="status">
+  <span class="chip-ico" id="chipIco">雪</span>
+  <div class="chip-tx">
+    <b id="chipTitle">地形视图</b>
+    <s id="chipSub"></s>
+    <s class="cg" id="chipGeo"></s>
+    <s class="cw" id="chipWater"></s>
+  </div>
+  <button class="chip-x" id="chipX" type="button">全景</button>
+</div>
+
+<!-- ============ 底部面板 ============ -->
+<section class="sheet" id="sheet" aria-label="信息面板">
+  <div class="sheet-grip" id="grip" role="button" tabindex="0" aria-label="拖动或点击展开面板">
+    <span></span>
+  </div>
+
+  <nav class="seg" id="seg" aria-label="面板切换">
+    <button type="button" data-pane="list" class="on">行军序列</button>
+    <button type="button" data-pane="info">节点详情</button>
+    <button type="button" data-pane="layer">图层</button>
+  </nav>
+
+  <div class="panes">
+
+    <!-- ---------- 行军序列 ---------- -->
+    <div class="pane on" data-pane="list" id="paneList">
+      <div class="tl" id="tl">
+        <div class="tl-row">
+          <button class="tl-play" id="tlPlay" type="button" aria-label="播放行军进程">▶</button>
+          <span class="tl-date" id="tlDate">1934.10.10</span>
+          <span class="tl-cur" id="tlCur"></span>
+        </div>
+        <input type="range" class="tl-range" id="tlRange" min="0" max="0" value="0" step="1" aria-label="行军时间轴">
+      </div>
+
+      <div class="list-top">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+          </svg>
+          <input id="q" type="search" inputmode="search" placeholder="检索节点 · 地点 · 战役" autocomplete="off" spellcheck="false">
+          <button class="q-clear" id="qClear" type="button" aria-label="清空检索" hidden>✕</button>
+        </div>
+        <div class="chips" id="armyChips"></div>
+      </div>
+
+      <div class="nodelist" id="nodelist"></div>
+
+      <div class="list-foot">共 <b id="total">0</b> 站 · <b id="battleCount">0</b> 场战役战斗</div>
+    </div>
+
+    <!-- ---------- 节点详情 ---------- -->
+    <div class="pane" data-pane="info" id="paneInfo"></div>
+
+    <!-- ---------- 图层 ---------- -->
+    <div class="pane" data-pane="layer" id="paneLayer">
+      <div class="ly">
+
+        <div class="ly-t">行军阶段</div>
+        <div class="seg2" id="phaseSeg">
+          <button type="button" data-phase="1">阶段一 · 中央红军</button>
+          <button type="button" data-phase="2" class="on">阶段二 · 三大主力</button>
+        </div>
+
+        <div class="ly-t">部队显示</div>
+        <div class="swrows" id="armyRows">
+          <button class="swrow" type="button" data-a="c1" style="--c:#ff3b30">
+            <i class="dot"></i><span>中央红军（红一方面军）</span><b class="ct"></b><span class="sw on"></span>
+          </button>
+          <button class="swrow" type="button" data-a="c2" style="--c:#22d3ee">
+            <i class="dot"></i><span>红二方面军</span><b class="ct"></b><span class="sw on"></span>
+          </button>
+          <button class="swrow" type="button" data-a="c4" style="--c:#b06bff">
+            <i class="dot"></i><span>红四方面军</span><b class="ct"></b><span class="sw on"></span>
+          </button>
+        </div>
+
+        <div class="ly-t">底图</div>
+        <div class="bases" id="bases">
+          <button type="button" data-base="night" class="on">墨夜地形</button>
+          <button type="button" data-base="relief">地貌晕渲</button>
+          <button type="button" data-base="sat">卫星实景</button>
+          <button type="button" data-base="natgeo">军事制图</button>
+        </div>
+
+        <div class="ly-t">图层开关</div>
+        <div class="swrows">
+          <button class="swrow" type="button" id="tgWater">
+            <i class="ico cy">≈</i><span>水系标注</span><b class="ct" id="waterCount">0</b><span class="sw on"></span>
+          </button>
+          <button class="swrow" type="button" id="tgGeo">
+            <i class="ico gr">▲</i><span>自然地理层</span><b class="ct" id="geoCount">0</b><span class="sw on"></span>
+          </button>
+        </div>
+
+        <div class="ly-t">图例</div>
+        <div class="legend">
+          <div class="lg-row"><i class="ln" style="--c:#ff3b30"></i>中央红军行军线</div>
+          <div class="lg-row"><i class="ln" style="--c:#22d3ee"></i>红二方面军行军线</div>
+          <div class="lg-row"><i class="ln" style="--c:#b06bff"></i>红四方面军行军线</div>
+          <div class="lg-row"><i class="sh hex" style="--c:#8ecbff"></i>翻越雪山</div>
+          <div class="lg-row"><i class="sh leaf" style="--c:#43d98b"></i>穿越草地</div>
+          <div class="lg-row"><i class="sh drop" style="--c:#2fb4ff"></i>江河渡口</div>
+          <div class="lg-row"><i class="ln w" style="--c:#2e86c8"></i>河流水系 · 放大浮现</div>
+          <div class="lg-row"><i class="cir" style="--c:#84e8b6"></i>湖泊 · 沼泽湿地</div>
+        </div>
+
+        <p class="ly-note">
+          底图与山体晕渲 &copy; Esri；行军路线由 OSM 步行 / 公路路径服务拟合后离线固化为折线，
+          川西无人区段落按史实走向手工加密并平滑，仅供宏观呈现，不作导航之用。<br>
+          路线数据 &copy; OpenStreetMap contributors（ODbL）。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 归属标注 ============ -->
+<div class="attribution" id="attribution">底图 &copy; Esri · 路线拟合 &copy; OpenStreetMap</div>
+
+<!-- ============ 提示与加载 ============ -->
+<div class="toast" id="toast">点标记看详情 · 上滑面板浏览 70 站</div>
+
+<div class="loading" id="loading">
+  <div class="load-in">
+    <div class="load-ring"></div>
+    <span>正在装载行军路线</span>
+  </div>
+</div>
+
+<noscript><p style="padding:40px;color:#fff">本页面需要启用 JavaScript 才能显示地图。</p></noscript>
+
+<script src="assets/vendor/leaflet/leaflet.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/geo.js"></script>
+<script src="assets/js/routes-geo.js"></script>
+<script src="assets/js/mobile.js"></script>
+</body>
+</html>
