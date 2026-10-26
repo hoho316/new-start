@@ -3,8 +3,6 @@
 > 1934.10 — 1936.10 · 三大主力红军战略转移
 > 一个为手机浏览器重新设计的交互式长征路线地图：**全局路线 → 节点详情 → 放大看地形**。
 
-**在线预览（手机可直接打开）**：<https://long-march-mobile.app.workbuddy.host/?sharecode=2H7BTZUBM5>
-
 <p align="center">
   <img src="docs/shot-01-overview.jpg" width="240" alt="全景路线">
   <img src="docs/shot-02-detail.jpg" width="240" alt="节点详情">
