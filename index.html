@@ -11,6 +11,17 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="中国工农红军长征路线地图 · 1934.10 — 1936.10 · 三大主力红军战略转移">
 <title>长征路线图 · 1934—1936</title>
+<!-- 手机浏览时自动进入专用移动端页面；桌面端与平板不受影响。加 ?pc=1 可强制留在 PC 版 -->
+<script>
+(function () {
+  try {
+    if (/[?&]pc=1/.test(location.search)) return;
+    var ua = navigator.userAgent || '';
+    var isPhone = /Android|iPhone|iPod|HarmonyOS|Windows Phone|Mobile Safari|Opera Mini/i.test(ua);
+    if (isPhone) location.replace('mobile.html' + location.search + location.hash);
+  } catch (e) {}
+})();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff3b30' d='M16 2.5 19.5 11 28.5 11.7 21.7 17.5 23.8 26.3 16 21.6 8.2 26.3 10.3 17.5 3.5 11.7 12.5 11Z'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="assets/css/style.css">
