@@ -13,6 +13,12 @@
   <img src="docs/shot-04-landscape.jpg" width="620" alt="横屏抽屉布局">
 </p>
 
+<p align="center">
+  <img src="docs/shot-05-index-mobile.png" width="240" alt="index.html 在手机上的降级版式">
+  <br>
+  <sub>↑ <code>index.html</code> 在 390px 手机上的降级版式（v1.1 起支持，无需跳到 mobile.html 也能看）</sub>
+</p>
+
 ---
 
 ## 目录
@@ -39,10 +45,14 @@
 
 | 入口 | 文件 | 适用设备 |
 | --- | --- | --- |
-| PC 端 | `index.html` | 桌面浏览器（≥1024px） |
-| **移动端** | **`mobile.html`** | **手机浏览器（320–600px，含横屏）** |
+| PC 端（已自适应降级） | `index.html` | 桌面 ≥1024px；**≤900px 自动切单列手机版式** |
+| **移动端专用** | **`mobile.html`** | **手机浏览器（320–600px，含横屏）** |
 
-> 本文档主要说明**移动端页面**。移动端不是 PC 页面的缩放版，而是**按手机屏幕重新设计的独立页面**：三段吸附底部面板、42px 触控热区、标签防重叠、横屏抽屉布局，均针对手指操作与窄屏阅读重新实现。
+> 两个入口**都能在手机上正常打开**：
+> - `index.html` 在 ≤900px 时会退化为「顶栏（两行）→ 地图 → 序列列表」的单列流式布局，信息卡片变底部抽屉，无横向滚动；
+> - `mobile.html` 是针对手指操作专门重做的体验：三段吸附面板、42px 触控热区、标签防重叠、横屏抽屉。
+>
+> 手机端推荐访问 `mobile.html`；如果只部署了 `index.html`，它本身也已经可用。
 
 ---
 
@@ -150,23 +160,24 @@ LM_M.declutter()             // 手动触发标签降噪
 
 ```
 longmarch/
-├── index.html                  # PC 端入口（桌面布局，本移动端改造未改动）
+├── index.html                  # PC 端入口（≥1181px 桌面版式；≤900px 自动单列降级）
 ├── mobile.html                 # ★ 移动端入口（新增）
 ├── README.md                   # ★ 本文档（新增）
 ├── docs/                       # ★ 文档截图（新增）
 │   ├── shot-01-overview.jpg
 │   ├── shot-02-detail.jpg
 │   ├── shot-03-terrain.jpg
-│   └── shot-04-landscape.jpg
+│   ├── shot-04-landscape.jpg
+│   └── shot-05-index-mobile.png   # index.html 手机降级版式
 ├── assets/
 │   ├── css/
-│   │   ├── style.css           # PC 端样式（未改动）
+│   │   ├── style.css           # PC 端样式（末尾新增 ≤900px 响应式区块）
 │   │   └── mobile.css          # ★ 移动端样式（新增，约 800 行）
 │   ├── js/
 │   │   ├── data.js             # 节点 / 部队 / 图例数据（共用，未改动）
 │   │   ├── geo.js              # 水系、地貌、加密点数据（共用，未改动）
 │   │   ├── routes-geo.js       # 拟合后的路线折线（共用，未改动）
-│   │   ├── app.js              # PC 端交互（未改动）
+│   │   ├── app.js              # PC 端交互（未改动，只读复用）
 │   │   └── mobile.js           # ★ 移动端交互引擎（新增，约 1150 行）
 │   └── vendor/leaflet/         # Leaflet 1.9.4 本地化（CSS/JS/图标）
 └── tools/
@@ -250,6 +261,45 @@ longmarch/
 - 地图保留左侧约 52% 宽度，标记定位时把目标点送到**左侧剩余区域的中心**，而不是整屏中心；
 - 归因标注、地形浮条、Toast 同步改到左侧，避免被抽屉遮挡。
 
+### 6. `index.html` 的响应式降级（v1.1 修复）
+
+手机上直接打开 `index.html` 曾出现「仍是 PC 宽版式、需要左右滑动」。排查结论与修复如下：
+
+**病因（三处叠加）**
+
+| # | 问题 | 说明 |
+| --- | --- | --- |
+| 1 | `#app` 用了 `1fr` 轨道 | CSS Grid 中 `1fr` 的**自动最小尺寸 = 内容的 min-content**，轨道会被内容撑宽，`1fr` 其实并不「可缩」 |
+| 2 | 顶栏是不换行的 flex | `.topbar` 默认 `flex-wrap:nowrap`，品牌 + 5 个统计块 + 4 个底图按钮 + 全景按钮的 min-content ≈ 1000px，直接把 `1fr` 轨道撑到 1000px |
+| 3 | 旧媒体查询只改了网格，没改顶栏 | `≤900px` 时 `#app` 换成单列、`.side` 变成 `translateX(-100%)` 的抽屉，但**没有任何按钮去加 `.open`**，序列列表在手机上等于永久隐藏 |
+
+结果：整页按 ~1000px 排版、被浏览器整体缩小 → 看起来像「PC 版没适配」。
+
+**修复**
+
+```css
+/* ① 轨道锁死，禁止内容撑宽 */
+#app{ grid-template-columns:352px minmax(0,1fr); }
+
+/* ② 顶栏允许换行、子项可收缩 */
+@media (max-width:900px){
+  .topbar{ flex-wrap:wrap; min-width:0; width:100%!important; }
+  .topright{ display:contents; }      /* 拆开嵌套 flex，按钮直接参与换行 */
+  .hstats{ display:none; }            /* 5 个统计块是溢宽主因 */
+}
+```
+
+`index.html` 的响应式断点（与 `mobile.html` 相互独立）：
+
+| 断点 | 变化 |
+| --- | --- |
+| `max-width:1180px` | 侧栏 352→290px，卡片 426→380px，统计块隐藏第 4、5 个 |
+| `max-width:900px` | **单列流式**：顶栏（≤390px 时两行）→ 地图 56dvh → 序列列表；`.side` 取消抽屉改常规区块；信息卡片改底部抽屉（`position:fixed`，`max-height:82dvh`）；时间轴整宽；图例/提示隐藏 |
+| `max-width:480px` | 地图 52dvh、标题 16px、底图按钮字号 10.5px、时间轴刻度隐藏 |
+| `max-height:560px` 且横屏 | 地图占满 `100dvh - 46px`，序列列表隐藏 |
+
+> 修复后实测：390 / 375 / 320 / 768 / 740×360（横屏）/ 1440 各视口 `document.scrollWidth` **均等于视口宽度**，无横向滚动；1440px 桌面端版式与修复前完全一致。
+
 ---
 
 ## 技术实现
@@ -282,7 +332,9 @@ longmarch/
 - 两者只在数据层共享 `data.js` / `geo.js` / `routes-geo.js`，且均为**只读引用**。
 - 移动端样式全部限定在 `mobile.css` 内，且顶栏品牌星形改用 `.bstar` 类名，避免与节点标记的 `.mk.star` 同名造型规则互相污染。
 
-> 因此：**PC 端 `index.html / style.css / app.js` 全程未被修改**，移动端新增文件可整体删除而不影响 PC 端运行。
+> v1.1 起 `index.html` / `style.css` 增加了**≤900px 的响应式降级**（见上一节），目的是「手机直接打开 PC 入口也不至于不可用」。
+> 这部分改动**全部包在 `@media (max-width:1180px)` 及更窄的断点里**，≥1181px 的桌面版式一行未动；`app.js` 与数据文件依旧零修改。
+> 若只需要桌面版，删掉 `style.css` 末尾的响应式区块即可；`mobile.html` 那套体验不受任何影响。
 
 ---
 
@@ -324,11 +376,28 @@ A：这是**标签降噪**：低缩放只保留关键节点，放大后其余节
 **Q：`file://` 双击打开为什么不行？**
 A：脚本按目录加载 `assets/`，`file://` 下会被同源策略拦截。请用任意静态服务器（见[使用方法](#使用方法)）。
 
+**Q：手机上打开还是「PC 宽版」、要左右滑，媒体查询像没生效？**
+A：按这三步排查：
+1. 确认手机访问的是哪个入口——`index.html` 已支持 ≤900px 单列版式，但**手机端推荐 `mobile.html`**；
+2. 打开 DevTools 看 `document.documentElement.scrollWidth` 是否大于 `window.innerWidth`，若大于，说明有元素把页面撑宽（本项目 v1.1 已修复顶栏与 `1fr` 轨道这两处）；
+3. 确认 `<head>` 里有 `<meta name="viewport" content="width=device-width, initial-scale=1.0">`。若部署平台（部分 CMS / 后台编辑器）会剥离或改写 viewport，需要在那层配置里放开。
+
+**Q：改了 `style.css` 手机上没变化？**
+A：多半是缓存。静态服务建议返回 `Cache-Control: no-store`，或在地址后加 `?v=2` 强制刷新。
+
 ---
 
 ## 更新记录
 
-### v1.0 · 移动端独立页面（本次）
+### v1.1 · `index.html` 响应式修复（本次）
+- 修正 `#app` 的 `1fr` 轨道 → `minmax(0,1fr)`，杜绝内容撑宽
+- 顶栏改为可换行 + `.topright{display:contents}`，≤390px 时压到两行
+- `≤900px` 重建为单列流式布局：顶栏 → 地图 56dvh → 序列列表，取消无开关的旧抽屉
+- 信息卡片改底部整宽抽屉（`position:fixed` + `max-height:82dvh`），时间轴整宽，图例/提示让位
+- 补 `viewport-fit=cover`、`theme-color`、内联 SVG favicon；恢复被误隐藏的「水系标注 / 自然地理层」开关
+- 桌面端（≥1181px）版式零改动
+
+### v1.0 · 移动端独立页面
 - 新增 `mobile.html` / `mobile.css` / `mobile.js`，与 PC 端完全解耦
 - 三段吸附底部面板 + 甩动手势，底栏常驻可见
 - 42px 触控热区、标签两段式避让、视口内降噪
